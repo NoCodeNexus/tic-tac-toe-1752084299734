@@ -1,0 +1,265 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+            position: relative; /* Required for hamburger menu positioning */
+        }
+
+        /* Hamburger Menu Icon */
+        .hamburger {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 15px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            margin: 5px 0;
+        }
+
+        /* Navigation Links (Hidden by Default) */
+        .nav-links {
+            display: none;
+            background-color: #333;
+            padding-top: 50px; /* Push links down below hamburger */
+        }
+
+        .nav-links a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        /* Show Nav Links when Hamburger is Active */
+        .navbar.active .nav-links {
+            display: block;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 10px;
+            margin: 20px auto;
+            width: 330px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            cursor: pointer;
+        }
+
+        .cell:hover {
+            background-color: #ddd;
+        }
+
+        #message {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #367c39;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        /* About Section */
+        #about {
+            padding: 50px;
+            background-color: #eee;
+        }
+
+        /* Contact Section */
+        #contact {
+            padding: 50px;
+            background-color: #ddd;
+        }
+
+        /* Portfolio Section */
+        #portfolio {
+            padding: 50px;
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#portfolio">Portfolio</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </div>
+
+    <h1>Tic Tac Toe</h1>
+
+    <div class="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+
+    <div id="message"></div>
+    <button onclick="resetBoard()">Reset</button>
+
+    <!-- About Section -->
+    <section id="about">
+        <h2>About Me</h2>
+        <p>This is the about section. Learn more about me here.</p>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio">
+        <h2>Portfolio</h2>
+        <p>Check out my latest projects and works.</p>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+        <h2>Contact Me</h2>
+        <p>Feel free to reach out to me for collaborations or inquiries.</p>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2024 Tic Tac Toe
+    </footer>
+
+    <script>
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let currentPlayer = "X";
+        let gameWon = false;
+
+        const winningCombinations = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        const cells = document.querySelectorAll(".cell");
+        const message = document.getElementById("message");
+
+        cells.forEach(cell => {
+            cell.addEventListener("click", handleCellClick);
+        });
+
+        function handleCellClick(event) {
+            const index = event.target.dataset.index;
+
+            if (board[index] === "" && !gameWon) {
+                board[index] = currentPlayer;
+                event.target.innerText = currentPlayer;
+                checkWin();
+                switchPlayer();
+            }
+        }
+
+        function switchPlayer() {
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+        }
+
+        function checkWin() {
+            for (let combination of winningCombinations) {
+                const [a, b, c] = combination;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    message.innerText = `${currentPlayer} wins!`;
+                    gameWon = true;
+                    return;
+                }
+            }
+
+            if (!board.includes("")) {
+                message.innerText = "It's a draw!";
+                gameWon = true;
+            }
+        }
+
+        function resetBoard() {
+            board = ["", "", "", "", "", "", "", "", ""];
+            currentPlayer = "X";
+            gameWon = false;
+            message.innerText = "";
+            cells.forEach(cell => cell.innerText = "");
+        }
+
+        function toggleMenu() {
+            document.querySelector('.navbar').classList.toggle('active');
+        }
+    </script>
+
+</body>
+</html>
+```
